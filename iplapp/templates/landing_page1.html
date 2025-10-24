@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}IPL Overview{% endblock %}
+
+{% block content %}
+<h2>Matches Overview</h2>
+<div id="chart_div1" style="width:100%; height:500px;"></div>
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Year', 'Matches'],
+    {% for item in matches_data %}
+      ['{{ item.season }}', {{ item.count }}],
+    {% endfor %}
+  ]);
+
+  var options = { title: 'Matches Played Per Year' };
+  var chart = new google.visualization.ColumnChart(document.getElementById('chart_div1'));
+  chart.draw(data, options);
+}
+</script>
+{% endblock %}

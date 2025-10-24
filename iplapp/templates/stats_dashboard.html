@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}IPL Yearly Stats{% endblock %}
+
+{% block content %}
+<h2>Choose IPL Year</h2>
+
+<form method="get">
+  <select name="year" onchange="this.form.submit()">
+    <option value="">--Select Year--</option>
+    {% for y in years %}
+      <option value="{{ y }}" {% if y|stringformat:'s' == selected_year %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if selected_year %}
+  <h3>Showing results for {{ selected_year }}</h3>
+
+  <div id="extra_runs_chart"></div>
+
+  <div id="economy_chart"></div>
+
+  <div id="matches_chart"></div>
+
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawCharts);
+
+    function drawCharts() {
+      var extraData = google.visualization.arrayToDataTable([
+        ['Team', 'Extra Runs'],
+        {% for e in extra_runs %}
+          ['{{ e.delivery__bowling_team }}', {{ e.total_extra_runs }}],
+        {% endfor %}
+      ]);
+      new google.visualization.ColumnChart(document.getElementById('extra_runs_chart')).draw(extraData, {title: 'Extra Runs per Team'});
+
+      var bowlData = google.visualization.arrayToDataTable([
+        ['Bowler', 'Economy'],
+        {% for b in bowlers %}
+          ['{{ b.bowler }}', {{ b.economy|floatformat:2 }}],
+        {% endfor %}
+      ]);
+      new google.visualization.BarChart(document.getElementById('economy_chart')).draw(bowlData, {title: 'Top Economical Bowlers'});
+
+      var matchData = google.visualization.arrayToDataTable([
+        ['Team', 'Played', 'Won'],
+        {% for r in results %}
+          ['{{ r.team }}', {{ r.played }}, {{ r.won }}],
+        {% endfor %}
+      ]);
+      new google.visualization.ColumnChart(document.getElementById('matches_chart')).draw(matchData, {title: 'Matches Played vs Won ({{ selected_year }})', isStacked: true});
+    }
+  </script>
+
+{% endif %}
+{% endblock %}
